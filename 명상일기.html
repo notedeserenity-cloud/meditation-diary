@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>명상 일기</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f7f7f5;
+      --bg-tertiary: #f0efea;
+      --text-primary: #1a1a1a;
+      --text-secondary: #6b6b6b;
+      --text-tertiary: #a0a0a0;
+      --border: rgba(0,0,0,0.1);
+      --border-hover: rgba(0,0,0,0.2);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg-tertiary);
+      min-height: 100vh;
+      color: var(--text-primary);
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    .header { text-align: center; margin-bottom: 2rem; padding-top: 0.5rem; }
+    .header-icon { font-size: 30px; margin-bottom: 0.5rem; }
+    .header h1 { font-family: 'Noto Serif KR', serif; font-size: 22px; font-weight: 400; letter-spacing: 0.08em; color: var(--text-primary); }
+    .header p { font-size: 13px; color: var(--text-secondary); margin-top: 4px; font-weight: 300; }
+
+    .tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; background: var(--bg-secondary); border-radius: var(--radius-lg); padding: 4px; border: 0.5px solid var(--border); }
+    .tab { flex: 1; padding: 8px; border: none; background: transparent; border-radius: 9px; font-size: 13px; font-family: 'Noto Sans KR', sans-serif; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; font-weight: 400; }
+    .tab.active { background: var(--bg-primary); color: var(--text-primary); font-weight: 500; border: 0.5px solid var(--border); }
+
+    .section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 10px; }
+
+    .card { background: var(--bg-primary); border-radius: var(--radius-lg); border: 0.5px solid var(--border); padding: 1.25rem; margin-bottom: 1rem; }
+
+    .date-row { display: flex; align-items: center; gap: 10px; }
+    .date-display { flex: 1; }
+    .date-big { font-family: 'Noto Serif KR', serif; font-size: 15px; font-weight: 400; color: var(--text-primary); }
+    .date-sub { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+    .today-badge { background: #EAF3DE; color: #3B6D11; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+
+    .mood-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .mood-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; border: 0.5px solid var(--border); background: var(--bg-secondary); border-radius: var(--radius-md); cursor: pointer; transition: all 0.18s; font-family: 'Noto Sans KR', sans-serif; }
+    .mood-btn:hover { background: var(--bg-primary); border-color: var(--border-hover); }
+    .mood-btn.selected { border-width: 1.5px; }
+    .mood-btn.selected.m0 { border-color: #63B3ED; background: #EBF8FF; }
+    .mood-btn.selected.m1 { border-color: #68D391; background: #F0FFF4; }
+    .mood-btn.selected.m2 { border-color: #F6AD55; background: #FFFAF0; }
+    .mood-btn.selected.m3 { border-color: #FC8181; background: #FFF5F5; }
+    .mood-btn.selected.m4 { border-color: #B794F4; background: #FAF5FF; }
+    .mood-btn.selected.m5 { border-color: #F56565; background: #FFF0F0; }
+    .mood-emoji { font-size: 22px; }
+    .mood-label { font-size: 10px; color: var(--text-secondary); font-weight: 400; }
+
+    .intensity-row { display: flex; align-items: center; gap: 12px; }
+    .intensity-row label { font-size: 13px; color: var(--text-secondary); white-space: nowrap; min-width: 80px; }
+    .intensity-row input[type=range] { flex: 1; -webkit-appearance: none; height: 4px; background: var(--bg-secondary); border-radius: 2px; outline: none; border: 0.5px solid var(--border); }
+    .intensity-row input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #553C9A; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+    .intensity-row span { font-size: 13px; font-weight: 500; min-width: 24px; text-align: right; color: var(--text-primary); }
+
+    .duration-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .dur-btn { padding: 9px 4px; border: 0.5px solid var(--border); background: var(--bg-secondary); border-radius: var(--radius-md); font-size: 12px; font-family: 'Noto Sans KR', sans-serif; color: var(--text-secondary); cursor: pointer; text-align: center; transition: all 0.18s; }
+    .dur-btn:hover { background: var(--bg-primary); border-color: var(--border-hover); }
+    .dur-btn.selected { background: var(--bg-primary); border: 1.5px solid #9F7AEA; color: #553C9A; font-weight: 500; }
+
+    .type-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .type-chip { padding: 6px 14px; border: 0.5px solid var(--border); background: var(--bg-secondary); border-radius: 20px; font-size: 12px; font-family: 'Noto Sans KR', sans-serif; color: var(--text-secondary); cursor: pointer; transition: all 0.18s; }
+    .type-chip:hover { background: var(--bg-primary); border-color: var(--border-hover); }
+    .type-chip.selected { background: #EDE9FE; border: 1.5px solid #9F7AEA; color: #553C9A; font-weight: 500; }
+
+    textarea { width: 100%; min-height: 130px; border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 12px; font-family: 'Noto Serif KR', serif; font-size: 14px; font-weight: 300; color: var(--text-primary); background: var(--bg-secondary); resize: none; line-height: 1.8; outline: none; transition: border-color 0.18s; }
+    textarea:focus { border-color: var(--border-hover); background: var(--bg-primary); }
+    textarea::placeholder { color: var(--text-tertiary); }
+
+    .save-btn { width: 100%; padding: 14px; background: #553C9A; color: white; border: none; border-radius: var(--radius-md); font-size: 14px; font-family: 'Noto Sans KR', sans-serif; font-weight: 500; cursor: pointer; transition: all 0.18s; letter-spacing: 0.04em; }
+    .save-btn:hover { background: #44337A; }
+    .save-btn:active { transform: scale(0.99); }
+
+    .entries-list { display: flex; flex-direction: column; gap: 10px; }
+    .entry-card { background: var(--bg-primary); border-radius: var(--radius-lg); border: 0.5px solid var(--border); padding: 1.25rem; cursor: pointer; transition: border-color 0.18s; }
+    .entry-card:hover { border-color: var(--border-hover); }
+    .entry-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .entry-date { font-size: 12px; color: var(--text-secondary); }
+    .entry-date strong { display: block; font-size: 15px; font-weight: 500; color: var(--text-primary); }
+    .entry-mood-badge { font-size: 20px; }
+    .entry-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .meta-pill { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--bg-secondary); color: var(--text-secondary); border: 0.5px solid var(--border); }
+    .entry-preview { font-family: 'Noto Serif KR', serif; font-size: 13px; font-weight: 300; color: var(--text-secondary); line-height: 1.7; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-tertiary); }
+    .empty-state .empty-icon { font-size: 36px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; line-height: 1.6; }
+
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+    .stat-card { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 1rem; text-align: center; border: 0.5px solid var(--border); }
+    .stat-num { font-size: 28px; font-weight: 500; color: var(--text-primary); }
+    .stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+
+    .mood-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .mood-bar-label { font-size: 18px; min-width: 26px; }
+    .mood-bar-name { font-size: 12px; color: var(--text-secondary); min-width: 32px; }
+    .mood-bar-track { flex: 1; height: 6px; background: var(--bg-secondary); border-radius: 3px; overflow: hidden; }
+    .mood-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+    .mood-bar-count { font-size: 12px; color: var(--text-tertiary); min-width: 20px; text-align: right; }
+
+    .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: #553C9A; color: white; padding: 11px 26px; border-radius: 24px; font-size: 13px; font-family: 'Noto Sans KR', sans-serif; transition: transform 0.3s ease; z-index: 100; white-space: nowrap; box-shadow: 0 4px 16px rgba(85,60,154,0.3); }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .delete-btn { background: none; border: none; cursor: pointer; color: var(--text-tertiary); font-size: 16px; padding: 4px; border-radius: 4px; transition: color 0.18s; }
+    .delete-btn:hover { color: #E53E3E; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-icon">🪷</div>
+      <h1>명상 일기</h1>
+      <p id="header-streak">오늘도 마음을 들여다 보아요</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('write')">✍️ 오늘의 기록</button>
+      <button class="tab" onclick="switchTab('list')">📖 지난 일기</button>
+      <button class="tab" onclick="switchTab('stats')">📊 통계</button>
+    </div>
+
+    <!-- 오늘의 기록 -->
+    <div id="page-write" class="page active">
+      <p class="section-label">날짜</p>
+      <div class="card" style="padding: 0.7rem 1.25rem; margin-bottom: 1rem;">
+        <div class="date-row">
+          <div class="date-display">
+            <div class="date-big" id="today-date"></div>
+            <div class="date-sub" id="today-day"></div>
+          </div>
+          <span class="today-badge">오늘</span>
+        </div>
+      </div>
+
+      <p class="section-label">지금 기분은?</p>
+      <div class="card">
+        <div class="mood-grid">
+          <button class="mood-btn m0" onclick="selectMood(0)"><span class="mood-emoji">😌</span><span class="mood-label">평온</span></button>
+          <button class="mood-btn m1" onclick="selectMood(1)"><span class="mood-emoji">😄</span><span class="mood-label">기쁨</span></button>
+          <button class="mood-btn m2" onclick="selectMood(2)"><span class="mood-emoji">😐</span><span class="mood-label">보통</span></button>
+          <button class="mood-btn m3" onclick="selectMood(3)"><span class="mood-emoji">😟</span><span class="mood-label">불안</span></button>
+          <button class="mood-btn m4" onclick="selectMood(4)"><span class="mood-emoji">😔</span><span class="mood-label">슬픔</span></button>
+          <button class="mood-btn m5" onclick="selectMood(5)"><span class="mood-emoji">😤</span><span class="mood-label">분노</span></button>
+        </div>
+      </div>
+
+      <p class="section-label">명상 깊이</p>
+      <div class="card" style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="intensity-row">
+          <label>집중도</label>
+          <input type="range" min="1" max="10" value="5" id="focus-slider" oninput="document.getElementById('focus-val').textContent=this.value">
+          <span id="focus-val">5</span>
+        </div>
+        <div class="intensity-row">
+          <label>평온함</label>
+          <input type="range" min="1" max="10" value="5" id="calm-slider" oninput="document.getElementById('calm-val').textContent=this.value">
+          <span id="calm-val">5</span>
+        </div>
+      </div>
+
+      <p class="section-label">명상 시간</p>
+      <div class="card">
+        <div class="duration-grid">
+          <button class="dur-btn" onclick="selectDur(this,'5분')">5분</button>
+          <button class="dur-btn" onclick="selectDur(this,'10분')">10분</button>
+          <button class="dur-btn" onclick="selectDur(this,'20분')">20분</button>
+          <button class="dur-btn" onclick="selectDur(this,'30분')">30분</button>
+          <button class="dur-btn" onclick="selectDur(this,'45분')">45분</button>
+          <button class="dur-btn" onclick="selectDur(this,'1시간')">1시간</button>
+          <button class="dur-btn" onclick="selectDur(this,'그 이상')">그 이상</button>
+          <button class="dur-btn" onclick="selectDur(this,'기록 안 함')">기록 안 함</button>
+        </div>
+      </div>
+
+      <p class="section-label">명상 종류</p>
+      <div class="card">
+        <div class="type-grid">
+          <button class="type-chip" onclick="toggleType(this,'호흡 명상')">🌬️ 호흡 명상</button>
+          <button class="type-chip" onclick="toggleType(this,'바디 스캔')">🧘 바디 스캔</button>
+          <button class="type-chip" onclick="toggleType(this,'자애 명상')">💛 자애 명상</button>
+          <button class="type-chip" onclick="toggleType(this,'걷기 명상')">🚶 걷기 명상</button>
+          <button class="type-chip" onclick="toggleType(this,'시각화')">🌙 시각화</button>
+          <button class="type-chip" onclick="toggleType(this,'만트라')">🔔 만트라</button>
+          <button class="type-chip" onclick="toggleType(this,'일기 명상')">📝 일기 명상</button>
+          <button class="type-chip" onclick="toggleType(this,'자유')">✨ 자유</button>
+        </div>
+      </div>
+
+      <p class="section-label">오늘의 기록</p>
+      <div class="card">
+        <textarea id="entry-text" placeholder="오늘 명상하면서 느낀 것들을 자유롭게 적어보세요. 어떤 생각이 떠올랐나요? 몸의 감각은 어땠나요?"></textarea>
+      </div>
+
+      <button class="save-btn" onclick="saveEntry()">오늘의 명상 저장하기</button>
+    </div>
+
+    <!-- 지난 일기 -->
+    <div id="page-list" class="page">
+      <div class="entries-list" id="entries-list"></div>
+    </div>
+
+    <!-- 통계 -->
+    <div id="page-stats" class="page">
+      <p class="section-label">전체 통계</p>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">총 명상 횟수</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-streak">0</div><div class="stat-label">연속 기록 일수</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-this-week">0</div><div class="stat-label">이번 주 명상</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-avg-calm">-</div><div class="stat-label">평균 평온도</div></div>
+      </div>
+      <p class="section-label" style="margin-top: 1rem;">기분 분포</p>
+      <div class="card" id="mood-bars">
+        <div class="empty-state" style="padding: 1rem 0;"><p style="font-size:13px">기록이 쌓이면 기분 통계가 보여요.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">✨ 명상 기록이 저장되었어요</div>
+
+  <script>
+    const DAYS = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+    const MONTHS = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+    const MOOD_EMOJI  = ['😌','😄','😐','😟','😔','😤'];
+    const MOOD_LABELS = ['평온','기쁨','보통','불안','슬픔','분노'];
+    const MOOD_COLORS = ['#63B3ED','#68D391','#F6AD55','#FC8181','#B794F4','#F56565'];
+
+    let selectedMood = null, selectedDur = null, selectedTypes = [];
+    let entries = [];
+    try { entries = JSON.parse(localStorage.getItem('meditation_entries') || '[]'); } catch(e) {}
+
+    function initDate() {
+      const now = new Date();
+      document.getElementById('today-date').textContent = `${now.getFullYear()}년 ${MONTHS[now.getMonth()]} ${now.getDate()}일`;
+      document.getElementById('today-day').textContent = DAYS[now.getDay()];
+    }
+
+    function switchTab(t) {
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      ['write','list','stats'].forEach((name, i) => { if(name===t) document.querySelectorAll('.tab')[i].classList.add('active'); });
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-'+t).classList.add('active');
+      if(t==='list') renderList();
+      if(t==='stats') renderStats();
+    }
+
+    function selectMood(i) {
+      selectedMood = i;
+      document.querySelectorAll('.mood-btn').forEach((b, idx) => b.classList.toggle('selected', idx===i));
+    }
+
+    function selectDur(el, val) {
+      selectedDur = val;
+      document.querySelectorAll('.dur-btn').forEach(b => b.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function toggleType(el, val) {
+      const idx = selectedTypes.indexOf(val);
+      if(idx>-1) { selectedTypes.splice(idx,1); el.classList.remove('selected'); }
+      else { selectedTypes.push(val); el.classList.add('selected'); }
+    }
+
+    function saveEntry() {
+      const now = new Date();
+      entries.unshift({
+        id: Date.now(), date: now.toISOString(), mood: selectedMood,
+        focus: parseInt(document.getElementById('focus-slider').value),
+        calm: parseInt(document.getElementById('calm-slider').value),
+        duration: selectedDur, types: [...selectedTypes],
+        text: document.getElementById('entry-text').value.trim()
+      });
+      try { localStorage.setItem('meditation_entries', JSON.stringify(entries)); } catch(e) {}
+      showToast(); resetForm(); updateStreak();
+    }
+
+    function resetForm() {
+      selectedMood = null; selectedDur = null; selectedTypes = [];
+      document.querySelectorAll('.mood-btn, .dur-btn, .type-chip').forEach(b => b.classList.remove('selected'));
+      document.getElementById('entry-text').value = '';
+      ['focus','calm'].forEach(k => {
+        document.getElementById(k+'-slider').value = 5;
+        document.getElementById(k+'-val').textContent = '5';
+      });
+    }
+
+    function showToast() {
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function deleteEntry(id, e) {
+      e.stopPropagation();
+      entries = entries.filter(en => en.id !== id);
+      try { localStorage.setItem('meditation_entries', JSON.stringify(entries)); } catch(err) {}
+      renderList();
+      updateStreak();
+    }
+
+    function formatDate(iso) {
+      const d = new Date(iso);
+      return `${d.getFullYear()}년 ${MONTHS[d.getMonth()]} ${d.getDate()}일`;
+    }
+
+    function renderList() {
+      const c = document.getElementById('entries-list');
+      if(!entries.length) {
+        c.innerHTML = `<div class="empty-state"><div class="empty-icon">🪷</div><p>아직 기록된 명상이 없어요.<br>첫 번째 명상을 기록해보세요.</p></div>`;
+        return;
+      }
+      c.innerHTML = entries.map(e => `
+        <div class="entry-card">
+          <div class="entry-header">
+            <div class="entry-date">
+              <strong>${formatDate(e.date)}</strong>
+              ${new Date(e.date).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="entry-mood-badge">${e.mood!==null ? MOOD_EMOJI[e.mood] : '—'}</div>
+              <button class="delete-btn" onclick="deleteEntry(${e.id}, event)" title="삭제">✕</button>
+            </div>
+          </div>
+          <div class="entry-meta">
+            ${e.mood!==null ? `<span class="meta-pill">${MOOD_LABELS[e.mood]}</span>` : ''}
+            ${e.duration ? `<span class="meta-pill">⏱ ${e.duration}</span>` : ''}
+            ${e.types.map(t=>`<span class="meta-pill">${t}</span>`).join('')}
+            <span class="meta-pill">집중 ${e.focus} · 평온 ${e.calm}</span>
+          </div>
+          ${e.text ? `<div class="entry-preview">${e.text}</div>` : ''}
+        </div>`).join('');
+    }
+
+    function renderStats() {
+      document.getElementById('stat-total').textContent = entries.length;
+      const now = new Date(), weekStart = new Date(now);
+      weekStart.setDate(now.getDate()-now.getDay());
+      document.getElementById('stat-this-week').textContent = entries.filter(e=>new Date(e.date)>=weekStart).length;
+      const calmVals = entries.map(e=>e.calm).filter(Boolean);
+      document.getElementById('stat-avg-calm').textContent = calmVals.length ? (calmVals.reduce((a,b)=>a+b,0)/calmVals.length).toFixed(1) : '-';
+      document.getElementById('stat-streak').textContent = calcStreak();
+      const moodCounts = [0,0,0,0,0,0];
+      entries.forEach(e => { if(e.mood!==null) moodCounts[e.mood]++; });
+      const maxCount = Math.max(...moodCounts, 1);
+      const mb = document.getElementById('mood-bars');
+      if(!entries.length) {
+        mb.innerHTML = `<div class="empty-state" style="padding:1rem 0"><p style="font-size:13px">기록이 쌓이면 기분 통계가 보여요.</p></div>`;
+        return;
+      }
+      mb.innerHTML = moodCounts.map((c,i) => `
+        <div class="mood-bar-row">
+          <span class="mood-bar-label">${MOOD_EMOJI[i]}</span>
+          <span class="mood-bar-name">${MOOD_LABELS[i]}</span>
+          <div class="mood-bar-track"><div class="mood-bar-fill" style="width:${Math.round(c/maxCount*100)}%;background:${MOOD_COLORS[i]}"></div></div>
+          <span class="mood-bar-count">${c}</span>
+        </div>`).join('');
+    }
+
+    function calcStreak() {
+      if(!entries.length) return 0;
+      const dates = [...new Set(entries.map(e=>new Date(e.date).toDateString()))];
+      if(!dates.includes(new Date().toDateString())) return 0;
+      let streak=1, d=new Date(); d.setDate(d.getDate()-1);
+      while(dates.includes(d.toDateString())) { streak++; d.setDate(d.getDate()-1); }
+      return streak;
+    }
+
+    function updateStreak() {
+      const s = calcStreak();
+      document.getElementById('header-streak').textContent = s>1 ? `🔥 ${s}일 연속 명상 중이에요!` : '오늘도 마음을 들여다 보아요';
+    }
+
+    initDate();
+    updateStreak();
+  </script>
+</body>
+</html>
